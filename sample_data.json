@@ -1,0 +1,45 @@
+{
+  "project": "awesome-ai",
+  "description": "A curated list of AI tools and resources",
+  "categories": [
+    {
+      "name": "Language Models",
+      "tools": [
+        {
+          "name": "ChatGPT",
+          "provider": "OpenAI",
+          "capabilities": ["text generation", "conversation", "coding"],
+          "pricing": "freemium"
+        },
+        {
+          "name": "GLM",
+          "provider": "Zhipu AI",
+          "capabilities": ["text generation", "conversation", "API compatible"],
+          "pricing": "API credits"
+        }
+      ]
+    },
+    {
+      "name": "Image Generation",
+      "tools": [
+        {
+          "name": "DALL-E",
+          "provider": "OpenAI",
+          "capabilities": ["image generation", "image editing"],
+          "pricing": "pay-per-use"
+        },
+        {
+          "name": "Midjourney",
+          "provider": "Midjourney",
+          "capabilities": ["image generation", "style transfer"],
+          "pricing": "subscription"
+        }
+      ]
+    }
+  ],
+  "statistics": {
+    "total_categories": 2,
+    "total_tools": 4,
+    "last_updated": "2025-10-25"
+  }
+}
