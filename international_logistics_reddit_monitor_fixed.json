@@ -1,0 +1,1115 @@
+{
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "06884099-94fe-4bc7-95f0-7f5f7b8317df",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 24
+            }
+          ]
+        }
+      },
+      "id": "cacedcdb-d074-4da8-97e3-32aff37d2f21",
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "subreddits",
+              "name": "subreddits",
+              "value": "=[\"FulfillmentByAmazon\", \"Entrepreneur\", \"smallbusiness\"]",
+              "type": "array"
+            },
+            {
+              "id": "keywords",
+              "name": "keywords",
+              "value": "=[\"Amazon FBA\", \"shipping delays\", \"customs clearance\", \"China factory\", \"international shipping\", \"freight forwarding\", \"customs duty\", \"import tax\", \"logistics cost\", \"supply chain\"]",
+              "type": "array"
+            },
+            {
+              "id": "time_filter",
+              "name": "time_filter",
+              "value": "day",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b2c6c93c-0aef-4bd2-a7e3-a7a917afe33c",
+      "name": "Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        208,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ \n  $json.subreddit && String($json.subreddit).trim()\n    ? 'https://oauth.reddit.com/r/' + encodeURIComponent(String($json.subreddit).trim()) + '/search'\n    : 'https://oauth.reddit.com/search'\n}}\n",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.keyword }}"
+            },
+            {
+              "name": "restrict_sr",
+              "value": "1"
+            },
+            {
+              "name": "sort",
+              "value": "new"
+            },
+            {
+              "name": "t",
+              "value": "={{ $json.time_filter }}"
+            },
+            {
+              "name": "limit",
+              "value": "7"
+            },
+            {
+              "name": "raw_json",
+              "value": "1"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "6f519639-f16a-4373-bd71-79b3dac72dfe",
+      "name": "Fetch Reddit Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        992,
+        112
+      ],
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "jaJwxpdFs9wmOxB5",
+          "name": "Unnamed credential"
+        },
+        "redditOAuth2Api": {
+          "id": "MJXGXZkHq2oeL92S",
+          "name": "Reddit account"
+        },
+        "oAuth2Api": {
+          "id": "B3PB1b65kXJwDGIi",
+          "name": "Reddit credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.children",
+        "options": {}
+      },
+      "id": "85f3ead5-b4bc-4fb3-857b-4c41bd8c24a3",
+      "name": "Split Posts",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "post_id",
+              "name": "post_id",
+              "value": "={{ $json.data.id }}",
+              "type": "string"
+            },
+            {
+              "id": "subreddit",
+              "name": "subreddit",
+              "value": "={{ $json.data.subreddit }}",
+              "type": "string"
+            },
+            {
+              "id": "title",
+              "name": "title",
+              "value": "={{ $json.data.title }}",
+              "type": "string"
+            },
+            {
+              "id": "selftext",
+              "name": "selftext",
+              "value": "={{ $json.data.selftext }}",
+              "type": "string"
+            },
+            {
+              "id": "author",
+              "name": "author",
+              "value": "={{ $json.data.author }}",
+              "type": "string"
+            },
+            {
+              "id": "3a6f1276-a89f-4915-a384-4784e0726612",
+              "name": "score",
+              "value": "={{ Number($json.data.score) }}",
+              "type": "string"
+            },
+            {
+              "id": "upvote_ratio",
+              "name": "upvote_ratio",
+              "value": "={{ Number($json.data.upvote_ratio) }}",
+              "type": "number"
+            },
+            {
+              "id": "num_comments",
+              "name": "num_comments",
+              "value": "={{ Number($json.data.num_comments) }}",
+              "type": "number"
+            },
+            {
+              "id": "created_utc",
+              "name": "created_utc",
+              "value": "={{ Number($json.data.created_utc) }}",
+              "type": "number"
+            },
+            {
+              "id": "permalink",
+              "name": "permalink",
+              "value": "=https://www.reddit.com{{ $json.data.permalink }}",
+              "type": "string"
+            },
+            {
+              "id": "post_date",
+              "name": "post_date",
+              "value": "={{ new Date($json.data.created_utc * 1000).toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "days_ago",
+              "name": "days_ago",
+              "value": "={{ Math.floor((Date.now() - $json.data.created_utc * 1000) / (1000 * 60 * 60 * 24)) }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd6bc160-9061-42b8-8521-2d0ed18be6ac",
+      "name": "Extract Post Data",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        1632,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.permalink }}.json?limit=100",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "9d96ff6d-86ae-4074-a563-96afe8e777ef",
+      "name": "Fetch Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1824,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const comments = [];\nconst commentData = $input.item.json[1]?.data?.children || [];\n\nfor (let i = 0; i < Math.min(commentData.length, 10); i++) {\n  const comment = commentData[i]?.data;\n  if (comment && comment.body && comment.body !== '[deleted]' && comment.body !== '[removed]') {\n    comments.push({\n      author: comment.author,\n      body: comment.body,\n      score: comment.score,\n      created_utc: comment.created_utc\n    });\n  }\n}\n\n// Get post data from Extract Post Data node\nconst postData = $node[\"Extract Post Data\"].json;\n\nreturn {\n  post_id: postData.post_id,\n  subreddit: postData.subreddit,\n  title: postData.title,\n  selftext: postData.selftext,\n  author: postData.author,\n  score: postData.score,\n  upvote_ratio: postData.upvote_ratio,\n  num_comments: postData.num_comments,\n  created_utc: postData.created_utc,\n  permalink: postData.permalink,\n  post_date: postData.post_date,\n  days_ago: postData.days_ago,\n  top_comments: comments,\n  comment_summary: comments.map(c => c.body).join('\\n\\n---\\n\\n').substring(0, 3000)\n};"
+      },
+      "id": "b4ff2154-2668-41e8-abd0-072211da4687",
+      "name": "Extract Comments",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAQJOVhRs8ZRFpmHM5SHZlgc5RMqqJXpuU",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ {\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"You are an international logistics and supply chain expert analyst. Analyze the following Reddit post and comments about logistics, shipping, customs, and international trade.\\n\\n\" + $json.full_content + \"\\n\\nProvide a comprehensive analysis in this EXACT JSON format (return ONLY valid JSON, no markdown):\\n{\\n  \\\"sentiment\\\": \\\"positive/negative/neutral\\\",\\n  \\\"sentiment_score\\\": 50,\\n  \\\"pain_points\\\": [\\\"specific pain point 1\\\", \\\"pain point 2\\\"],\\n  \\\"user_needs\\\": [\\\"need 1\\\", \\\"need 2\\\"],\\n  \\\"competitor_mentions\\\": [\\\"competitor 1\\\", \\\"competitor 2\\\"],\\n  \\\"urgency_level\\\": \\\"low/medium/high/critical\\\",\\n  \\\"topic_category\\\": \\\"shipping/customs/tax/warehouse/supply-chain/other\\\",\\n  \\\"business_opportunity\\\": \\\"detailed description of the business opportunity\\\",\\n  \\\"conversion_potential\\\": 50,\\n  \\\"seo_keywords\\\": [\\\"keyword1\\\", \\\"keyword2\\\", \\\"keyword3\\\"],\\n  \\\"chinese_summary\\\": \\\"用200字中文总结这个讨论的核心问题、用户痛点和潜在商业机会\\\",\\n  \\\"english_summary\\\": \\\"A 200-word English summary of the discussion, pain points, and business opportunities\\\"\\n}\"\n    }]\n  }],\n  \"generationConfig\": {\n    \"temperature\": 0.3,\n    \"maxOutputTokens\": 4096,\n    \"responseMimeType\": \"application/json\"\n  }\n} }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "6b8e5627-284a-41de-af77-c3b6e96aa5a3",
+      "name": "Gemini - Sentiment Analysis",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "method": "=POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=AIzaSyAQJOVhRs8ZRFpmHM5SHZlgc5RMqqJXpuU",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={{ {\n  \"contents\": [{\n    \"parts\": [{\n      \"text\": \"You are a social media and content marketing expert. Based on the following Reddit discussion about logistics and supply chain, create engaging content ideas for different platforms.\\n\\n\" + $json.full_content + \"\\n\\nProvide content ideas in this EXACT JSON format (return ONLY valid JSON, no markdown):\\n{\\n  \\\"linkedin_post\\\": \\\"A professional LinkedIn post (150-200 words) discussing the logistics challenge and potential solutions\\\",\\n  \\\"twitter_thread\\\": \\\"A Twitter thread outline with 5-7 tweet points about this shipping issue\\\",\\n  \\\"facebook_post\\\": \\\"An engaging Facebook post (100-150 words) for business owners facing similar challenges\\\",\\n  \\\"instagram_caption\\\": \\\"An Instagram caption with relevant hashtags about FBA logistics\\\",\\n  \\\"tiktok_script\\\": \\\"A 30-second TikTok video script outline explaining this logistics problem\\\",\\n  \\\"youtube_title\\\": \\\"A catchy YouTube video title about Amazon FBA shipping challenges\\\",\\n  \\\"blog_title\\\": \\\"An SEO-optimized blog post title about this topic\\\"\\n}\"\n    }]\n  }],\n  \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 4096,\n    \"responseMimeType\": \"application/json\"\n  }\n} }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "2eba259d-c490-4df4-9788-3abd4ac844a3",
+      "name": "Gemini - Content Ideas",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get data from different nodes directly\nconsole.log('=== Getting data from nodes ===');\n\n// Get Sentiment Analysis response\nlet sentimentResponse = null;\ntry {\n  sentimentResponse = $node[\"Gemini - Sentiment Analysis\"].json;\n  console.log('[OK] Got Sentiment Analysis');\n} catch (e) {\n  console.log('[ERROR] Cannot get Sentiment Analysis:', e.message);\n}\n\n// Get Content Ideas response\nlet contentResponse = null;\ntry {\n  contentResponse = $node[\"Gemini - Content Ideas\"].json;\n  console.log('[OK] Got Content Ideas');\n} catch (e) {\n  console.log('[ERROR] Cannot get Content Ideas:', e.message);\n}\n\n// Get Reddit data from Prepare AI Input1\nlet redditData = null;\ntry {\n  redditData = $node[\"Prepare AI Input1\"].json;\n  console.log('[OK] Got Reddit data from Prepare AI Input1');\n  console.log('Reddit post_id:', redditData.post_id);\n  console.log('Reddit title:', redditData.title ? 'YES' : 'NO');\n} catch (e) {\n  console.log('[ERROR] Cannot get Reddit data:', e.message);\n}\n\nconsole.log('');\nconsole.log('=== Summary ===');\nconsole.log('Reddit data:', redditData?.post_id ? 'YES' : 'NO');\nconsole.log('Sentiment response:', sentimentResponse ? 'YES' : 'NO');\nconsole.log('Content response:', contentResponse ? 'YES' : 'NO');\n\n// Parse Gemini responses\nfunction parseGemini(data, name) {\n  try {\n    if (!data || !data.candidates) {\n      console.log('[WARN] ' + name + ' no candidates');\n      return {};\n    }\n\n    const parts = data.candidates[0]?.content?.parts;\n    if (!parts || parts.length === 0) {\n      console.log('[WARN] ' + name + ' no parts');\n      return {};\n    }\n\n    const rawText = parts[0]?.text;\n    if (!rawText) {\n      console.log('[WARN] ' + name + ' no text');\n      return {};\n    }\n\n    console.log('[OK] ' + name + ' text length: ' + rawText.length);\n\n    const cleaned = rawText.trim()\n      .replace(/^```json\\s*/i, '')\n      .replace(/^```\\s*/, '')\n      .replace(/\\s*```$/, '');\n\n    const parsed = JSON.parse(cleaned);\n    console.log('[OK] ' + name + ' parsed successfully');\n    return parsed;\n  } catch (error) {\n    console.log('[ERROR] ' + name + ' parse failed: ' + error.message);\n    return {};\n  }\n}\n\nconst sentiment = parseGemini(sentimentResponse, 'Sentiment');\nconst content = parseGemini(contentResponse, 'Content');\n\n// If no Reddit data found, create empty object\nif (!redditData) {\n  console.log('[ERROR] No Reddit data found');\n  redditData = {};\n}\n\n// Calculate metrics\nconst score = Number(redditData.score) || 0;\nconst upvoteRatio = Number(redditData.upvote_ratio) || 0.5;\nconst numComments = Number(redditData.num_comments) || 0;\nconst createdUtc = Number(redditData.created_utc) || (Date.now() / 1000);\nconst hoursOld = ((Date.now() - createdUtc * 1000) / (1000 * 60 * 60));\n\nconst hotScore = Math.round((score * upvoteRatio + numComments * 0.5) / Math.pow(hoursOld + 2, 1.5));\n\nlet trend = 'stable';\nif (hoursOld < 24) {\n  if (score > 50) trend = 'rising';\n  if (score > 100) trend = 'hot';\n  if (score > 500) trend = 'viral';\n}\n\nconst engagementRate = numComments > 0 ? Math.round((numComments / Math.max(score, 1)) * 100) : 0;\n\n// Build final output\nconst output = {\n  post_id: redditData.post_id || '',\n  link: redditData.permalink || '',\n  platform: 'Reddit',\n  subreddit: redditData.subreddit || '',\n  score: score,\n  upvote_ratio: upvoteRatio,\n  num_comments: numComments,\n  days_ago: redditData.days_ago || 0,\n  post_date: redditData.post_date || '',\n  title: redditData.title || '',\n  content: redditData.selftext || '',\n  author: redditData.author || '',\n\n  sentiment: sentiment.sentiment || 'neutral',\n  sentiment_score: Number(sentiment.sentiment_score) || 50,\n  pain_points: Array.isArray(sentiment.pain_points) ? sentiment.pain_points.join('; ') : '',\n  user_needs: Array.isArray(sentiment.user_needs) ? sentiment.user_needs.join('; ') : '',\n  competitor_mentions: Array.isArray(sentiment.competitor_mentions) ? sentiment.competitor_mentions.join('; ') : '',\n  urgency_level: sentiment.urgency_level || 'medium',\n  topic_category: sentiment.topic_category || 'general',\n  business_opportunity: sentiment.business_opportunity || '',\n  conversion_potential: Number(sentiment.conversion_potential) || 50,\n  seo_keywords: Array.isArray(sentiment.seo_keywords) ? sentiment.seo_keywords.join(', ') : '',\n  chinese_summary: sentiment.chinese_summary || '',\n  english_summary: sentiment.english_summary || '',\n\n  linkedin_idea: content.linkedin_post || '',\n  twitter_idea: content.twitter_thread || '',\n  facebook_idea: content.facebook_post || '',\n  instagram_idea: content.instagram_caption || '',\n  tiktok_idea: content.tiktok_script || '',\n  youtube_title: content.youtube_title || '',\n  blog_title: content.blog_title || '',\n\n  hot_score: hotScore,\n  trend: trend,\n  engagement_rate: engagementRate,\n  extracted_at: new Date().toISOString(),\n  top_comments: JSON.stringify(redditData.top_comments || [])\n};\n\nconsole.log('');\nconsole.log('=== Final Check ===');\nconsole.log('post_id: ' + (output.post_id ? 'OK' : 'EMPTY'));\nconsole.log('title: ' + (output.title ? 'OK' : 'EMPTY'));\nconsole.log('linkedin_idea: ' + (output.linkedin_idea ? 'OK' : 'EMPTY'));\n\nreturn output;"
+      },
+      "id": "3be222a1-9103-4499-b54d-5a4056f35140",
+      "name": "Calculate Metrics & Structure Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2768,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "=1FKtICtmHMvlBaP8oeF_nk9LeCL28JZ2lqmWHfIHDYaw",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Reddit Logistics Monitor",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "post_id",
+              "displayName": "post_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "platform",
+              "displayName": "platform",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "subreddit",
+              "displayName": "subreddit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "score",
+              "displayName": "score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "upvote_ratio",
+              "displayName": "upvote_ratio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "num_comments",
+              "displayName": "num_comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "days_ago",
+              "displayName": "days_ago",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "post_date",
+              "displayName": "post_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "author",
+              "displayName": "author",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sentiment",
+              "displayName": "sentiment",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "sentiment_score",
+              "displayName": "sentiment_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "pain_points",
+              "displayName": "pain_points",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "user_needs",
+              "displayName": "user_needs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "competitor_mentions",
+              "displayName": "competitor_mentions",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "urgency_level",
+              "displayName": "urgency_level",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "topic_category",
+              "displayName": "topic_category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "business_opportunity",
+              "displayName": "business_opportunity",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "conversion_potential",
+              "displayName": "conversion_potential",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "seo_keywords",
+              "displayName": "seo_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "chinese_summary",
+              "displayName": "chinese_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "english_summary",
+              "displayName": "english_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "linkedin_idea",
+              "displayName": "linkedin_idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "twitter_idea",
+              "displayName": "twitter_idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "facebook_idea",
+              "displayName": "facebook_idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "instagram_idea",
+              "displayName": "instagram_idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tiktok_idea",
+              "displayName": "tiktok_idea",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "youtube_title",
+              "displayName": "youtube_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "blog_title",
+              "displayName": "blog_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "hot_score",
+              "displayName": "hot_score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "trend",
+              "displayName": "trend",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "engagement_rate",
+              "displayName": "engagement_rate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "extracted_at",
+              "displayName": "extracted_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "top_comments",
+              "displayName": "top_comments",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ea622e49-d75f-4109-98b0-c16d878c20c0",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.4,
+      "position": [
+        3040,
+        112
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "zoQFOrLYqdUqbDX6",
+          "name": "Google Sheets OAuth2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.urgency_level }}",
+              "rightValue": "high",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "c81e6a35-7903-45bd-b798-8bb3b117decb"
+            },
+            {
+              "leftValue": "={{ $json.urgency_level }}",
+              "rightValue": "critical",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              },
+              "id": "72ec9790-7ce8-4a47-be5d-7e8930021620"
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "d328265c-25da-4699-b86d-06ff0f454219",
+      "name": "Filter Urgent Issues",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        3344,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $env.NOTIFICATION_EMAIL }}",
+        "toEmail": "={{ $env.ALERT_RECIPIENT_EMAIL }}",
+        "subject": "=🚨 紧急物流问题 - {{ $json.topic_category }}",
+        "options": {}
+      },
+      "id": "0655e140-2a0d-40f1-82dc-5b81c816dd63",
+      "name": "Send Email Alert",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        3680,
+        256
+      ],
+      "webhookId": "e80c2a24-e526-4b7d-8b6a-420f2df49ca5"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $env.TELEGRAM_CHAT_ID }}",
+        "text": "=🚨 *紧急物流问题*\n\n*级别:* {{ $json.urgency_level }}\n*情感:* {{ $json.sentiment }} ({{ $json.sentiment_score }}/100)\n*分类:* {{ $json.topic_category }}\n*子版块:* r/{{ $json.subreddit }}\n\n*标题:* {{ $json.title }}\n\n*痛点:*\n{{ $json.pain_points }}\n\n*商机:*\n{{ $json.business_opportunity }}\n\n[查看帖子]({{ $json.link }})",
+        "additionalFields": {}
+      },
+      "id": "311e45a6-f14d-4859-b420-d354b942f6f2",
+      "name": "Send Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3680,
+        480
+      ],
+      "webhookId": "08105bc2-f991-4751-949e-7e6f1584dccf",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "total_processed",
+              "name": "total_processed",
+              "value": "={{ $runIndex + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "054fd5dd-d4c7-4d5a-a8de-fdf3629cb734",
+      "name": "Final Summary",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        4160,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const subs = $json.subreddits || [];\nconst kws = $json.keywords || [];\nconst time_filter = $json.time_filter || 'month';\n\nconst output = [];\n\nfor (const subreddit of subs) {\n  for (const keyword of kws) {\n    output.push({\n      json: {\n        subreddit,\n        keyword,\n        time_filter\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        112
+      ],
+      "id": "305d1b91-df98-4290-9395-aa11ef427050",
+      "name": "Generate Search Tasks"
+    },
+    {
+      "parameters": {
+        "jsCode": "// All data is already extracted by Extract Comments\nconst allData = $json;\nconst title = allData.title || \"\";\nconst content = allData.selftext || \"\";\nconst comments = allData.top_comments || [];\n\n// Format comments\nlet commentText = '';\nif (Array.isArray(comments) && comments.length > 0) {\n  commentText = comments.map(function(c) {\n    return c.body;\n  }).join('\\n\\n---\\n\\n');\n}\n\n// Return complete data\nreturn {\n  post_id: allData.post_id,\n  title: allData.title,\n  author: allData.author,\n  subreddit: allData.subreddit,\n  selftext: allData.selftext,\n  permalink: allData.permalink,\n  score: allData.score,\n  upvote_ratio: allData.upvote_ratio,\n  num_comments: allData.num_comments,\n  created_utc: allData.created_utc,\n  post_date: allData.post_date,\n  days_ago: allData.days_ago,\n  top_comments: allData.top_comments,\n  full_content: '【Title】' + title + '\\n\\n【Content】' + content + '\\n\\n【Top Comments】\\n' + commentText\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        112
+      ],
+      "id": "37a0be33-e73e-4865-9719-10b5bee09ad9",
+      "name": "Prepare AI Input1"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Schedule": {
+      "main": [
+        [
+          {
+            "node": "Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Configuration": {
+      "main": [
+        [
+          {
+            "node": "Generate Search Tasks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Reddit Posts": {
+      "main": [
+        [
+          {
+            "node": "Split Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Posts": {
+      "main": [
+        [
+          {
+            "node": "Extract Post Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Post Data": {
+      "main": [
+        [
+          {
+            "node": "Fetch Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Comments": {
+      "main": [
+        [
+          {
+            "node": "Extract Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Comments": {
+      "main": [
+        [
+          {
+            "node": "Prepare AI Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Calculate Metrics & Structure Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini - Content Ideas": {
+      "main": [
+        [
+          {
+            "node": "Calculate Metrics & Structure Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Metrics & Structure Data": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Filter Urgent Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Urgent Issues": {
+      "main": [
+        [
+          {
+            "node": "Send Email Alert",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Telegram Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email Alert": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Telegram Alert": {
+      "main": [
+        [
+          {
+            "node": "Final Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Search Tasks": {
+      "main": [
+        [
+          {
+            "node": "Fetch Reddit Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare AI Input1": {
+      "main": [
+        [
+          {
+            "node": "Gemini - Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Gemini - Content Ideas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "6c0586435f02df6cb8cb105ca5fd64db0b14528016962e4f794747c9f801fc01"
+  }
+}
